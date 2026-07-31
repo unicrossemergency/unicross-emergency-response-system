@@ -19,7 +19,7 @@ class IncidentConsumer(AsyncWebsocketConsumer):
 
     # NEW INCIDENT
     async def new_incident(self, event):
-
+        print("🔥 Consumer received:", event)
         data = event["data"]
 
         data["message_type"] = "new_incident"

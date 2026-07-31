@@ -145,7 +145,7 @@ DESCRIPTION:
         # =========================================
 
         channel_layer = get_channel_layer()
-
+        print("CHANNEL LAYER =", channel_layer)
         async_to_sync(channel_layer.group_send)(
             "incidents",
             {
@@ -160,7 +160,7 @@ DESCRIPTION:
                 }
             }
         )
-
+        print("✅ group_send finished")
         messages.success(request, "incident_success")
 
         return redirect("/")
