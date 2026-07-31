@@ -173,6 +173,7 @@ class IncidentAdmin(admin.ModelAdmin):
             )
 
             incident.status = "dispatched"
+            incident.acknowledged_by = request.user
             incident.save()
 
             send_status_sms(
@@ -200,6 +201,7 @@ class IncidentAdmin(admin.ModelAdmin):
 
         for incident in queryset:
             incident.status = "on_scene"
+            incident.acknowledged_by = request.user
             incident.save()
 
             send_status_sms(
@@ -226,6 +228,7 @@ class IncidentAdmin(admin.ModelAdmin):
 
         for incident in queryset:
             incident.status = "resolved"
+            incident.acknowledged_by = request.user
             incident.save()
 
             send_status_sms(
@@ -275,7 +278,8 @@ class IncidentAdmin(admin.ModelAdmin):
                             "id": obj.id,
                             "status": obj.status,
                             "incident_type": obj.incident_type,
-                            "acknowledged_by": request.user.username if request.user else None
+                            "acknowledged_by": request.user.email
+                            #"acknowledged_by": request.user.username if request.user else None
                         }
                     }
                 )
