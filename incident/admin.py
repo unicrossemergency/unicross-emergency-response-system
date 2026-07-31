@@ -258,8 +258,8 @@ class IncidentAdmin(admin.ModelAdmin):
             if old_obj.status != obj.status:
 
                 # 🔥 AUTO ASSIGN STAFF WHO MADE THE CHANGE
-                if not request.user.is_superuser:
-                    obj.acknowledged_by = request.user
+                #if not request.user.is_superuser:
+                obj.acknowledged_by = request.user
 
                 channel_layer = get_channel_layer()
 
