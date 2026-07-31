@@ -1,8 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     // ================= WEBSOCKET =================
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+
     const socket = new WebSocket(
-        "ws://127.0.0.1:8000/ws/incidents/"
+        `${wsScheme}://${window.location.host}/ws/incidents/`
     );
 
     // ================= SOUND =================
