@@ -627,8 +627,11 @@ document.addEventListener("DOMContentLoaded", function () {
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
+    const protocol =
+        window.location.protocol === "https:" ? "wss://" : "ws://";
+
     const socket = new WebSocket(
-        "ws://" + window.location.host + "/ws/incidents/"
+        protocol + window.location.host + "/ws/incidents/"
     );
 
     socket.onopen = function () {
