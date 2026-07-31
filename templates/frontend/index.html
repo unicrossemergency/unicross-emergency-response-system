@@ -1,0 +1,703 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNICROSS Emergency System</title>
+
+    <!-- Bootstrap -->
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
+     
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+    <!-- Bootstrap Icons -->
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg bg-light bg-gradient">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#"><img src="{% static 'images/school.png' %}" alt="" width="210px"></a>
+
+       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link text-black text-primary fw-semibold text-opacity-60 ms-3" href="#">Home</a></li>
+                <li class="nav-item"><a class="nav-link text-black text-primary fw-semibold text-opacity-60 ms-3" href="#">About</a></li>
+                <li class="nav-item"><a class="nav-link text-black text-primary fw-semibold text-opacity-60 ms-3" href="#">News</a></li>
+                <li class="nav-item"><a class="nav-link text-black text-primary fw-semibold text-opacity-60 ms-3" href="#report">Report Emergency</a></li>
+                <li class="nav-item">
+                    <a class="btn btn-light text-black text-primary fw-semibold text-opacity-60 ms-3" href="#" id="form-open">Staff Login</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div id="status-container"></div>
+ <section class="home">
+    <div class="form-container">
+        <i class="fa-solid fa-xmark form-close"></i>
+<!-- login form -->
+ <div class="form login-form">
+    <form method="post" action="{% url 'staff_login' %}">
+      {% csrf_token%}
+      {% for message in messages %}
+    {% if message.message == "login_error" %}
+        <div class="login-error" style="color:red; margin-bottom:10px; text-align:center">
+            Invalid credentials
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                document.querySelector('.home').classList.add('show');
+            });
+        </script>
+    {% endif %}
+{% endfor %}
+
+
+        <h2>Login</h2>
+      <div class="input_box">
+        <input type="email" name="email"  placeholder="Enter your Email" required autocomplete="off">
+        <i class="fa-regular fa-envelope email"></i>
+      </div>
+      <div class="input_box">
+        <input type="password" name="password"  placeholder="Enter your Password " required autocomplete="off">
+        <i class="fa-solid fa-lock password"></i>
+        <i class="fa-regular fa-eye-slash pw-hide"></i>
+      </div>
+      <div class="option-field">
+        <span class="checkbox">
+            <input type="checkbox" name="" id="check">
+            <label for="check"> Remember me</label>
+        </span>
+        <a href="" class="forgot_password">Forgot password?</a>
+      </div>
+      <button class="button">Login Now</button>
+      <!-- <div class="login_signup">
+        Don't have an account? <a href="#"  id="open-signup">SignUp</a>
+      </div> -->
+    </form>
+ </div>
+</section>
+<!-- ================= HERO ================= -->
+<main>
+    <div id="carouselExampleCaptions" class="carousel slide">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+  </div>
+  <div class="carousel-inner">
+    <div class="carousel-item active c-item">
+      <img src="{% static 'images/em.jpeg' %}" class="d-block w-100 c-img" alt="...">
+      <div class="carousel-caption top-0 mt-5 d-block ">
+        <h3 class="mt-5 fw-bold ">WELCOME TO</h3>
+        <h1 class="mt-5 fw-bold">UNIVERSITY OF CROSS RIVER STATE</h1>
+        <h3 class="fs-5 mt-5 fw-bold">EMERGENCY RESPONSE SYSTEM</h3>
+        <p class="lead mt-5 fw-bold">Fast Response • Safety • Real-Time Reporting</p>
+      </div>
+    </div>
+    <div class="carousel-item c-item-1">
+      <img src="{% static 'images/download.jpg' %}" class="d-block w-100  c-img-1" alt="...">
+      <div class="carousel-caption cl-2 d-block ">   
+     
+        <h1 class="fs-2 fw-bold mt-5  ">UNICROSS VC LEADS DELEGATION TO GOVERNMENT HOUSE,  PRESENTS AWARD-WINNING INNOVATIONS TO VISITOR</h1>
+        <p>The Vice Chancellor University of Cross River State (UNICROSS), Prof. Francisca Bassey, recently,....</p>
+         <button class="btn btn-primary px-3 py-2 mt-3">READ MORE</button>
+      </div>
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+</main>
+  <!-- ================= LIVE MAP ================= -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Live Emergency Map</h2>
+        <div id="map" style="height: 500px; border-radius: 12px;"></div>
+    </div>
+</section>
+
+
+<!-- ================= LATEST EMERGENCIES ================= -->
+<!-- ================= LATEST EMERGENCIES ================= -->
+{% if latest_incidents %}
+
+<section class="py-5">
+
+    <div class="container">
+
+        <h2 class="text-center mb-5">
+            Latest Emergencies
+        </h2>
+
+        <div class="row justify-content-center g-4">
+
+            {% for incident in latest_incidents %}
+
+            <div class="col-lg-4 col-md-6">
+
+                <div class="card emergency-card h-100">
+
+                    {% if incident.scene_image %}
+                    <img
+                        src="{{ incident.scene_image.url }}"
+                        class="card-img-top"
+                        style="
+                            height:220px;
+                            object-fit:cover;
+                        "
+                    >
+                    {% endif %}
+
+                    <div class="card-body">
+
+                        <h5 class="card-title">
+
+                            🚨
+                            {{ incident.incident_type|title }}
+
+                        </h5>
+
+                        <p>
+
+                            <strong>
+                                 Location:
+                            </strong>
+
+                            {{ incident.location_text }}
+
+                        </p>
+                         <p class="card-text">
+                                     {{ incident.description|truncatechars:120 }}
+                             </p>
+
+                        <small class="text-muted">
+
+                            {{ incident.created_at|timesince }}
+                            ago
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endif %}
+
+<!-- ================= REPORT FORM ================= -->
+<section id="report" class="report-section py-5">
+    <div class="container">
+    {% for message in messages %}
+        {% if message.message == "incident_success" %}
+            <div class="alert alert-success text-center mb-4">
+                Emergency reported successfully ✔
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+    <div class="container">
+        <h2 class="text-center mb-4">Report an Emergency</h2>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+
+        <form method="POST" action="{% url 'report_incident' %}" class="p-4 shadow bg-white rounded">
+    {% csrf_token %}
+
+    <!-- Reporter Name -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Your Name</label>
+        <input type="text" name="reporter_name" class="form-control" required>
+    </div>
+
+    <!-- Phone Number -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Phone Number</label>
+        <input type="tel" name="phone_number" class="form-control" required>
+    </div>
+
+    <!-- Manual Location -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Location</label>
+        <input type="text" name="manual_location" class="form-control" required>
+
+         <!-- GPS Status Indicator -->
+    <small id="gps_status" class="text-muted d-block mt-1">
+        Detecting location...
+    </small>
+    </div>
+
+    <!-- Hidden GPS Coordinates -->
+    <input type="hidden" name="gps_latitude" id="gps_latitude">
+    <input type="hidden" name="gps_longitude" id="gps_longitude">
+
+    <!-- Emergency Type -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Emergency Type</label>
+        <select name="incident_type" class="form-select" required>
+            <option value="">Select Emergency Type</option>
+            <option value="fire">Fire</option>
+            <option value="crime">Crime</option>
+            <option value="health">Health</option>
+            <option value="accident">Accident</option>
+            <option value="other">Other</option>
+        </select>
+    </div>
+
+    <!-- Anonymous Checkbox -->
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="anonymous" id="anonymousCheck">
+        <label class="form-check-label fw-semibold" for="anonymousCheck">
+            Submit as Anonymous Report
+        </label>
+        <small class="d-block text-muted mt-1">
+            Your details will still be stored securely but responders will treat this report as anonymous.
+        </small>
+    </div>
+
+    <!-- Description -->
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Emergency Details</label>
+        <textarea
+            name="description"
+            class="form-control"
+            rows="4"
+            placeholder="Describe the emergency..."
+            style="resize:none;"
+            required></textarea>
+    </div>
+
+    <!-- Submit Button -->
+    <button class="btn btn-danger w-100">
+        Submit Emergency
+    </button>
+</form>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<section class="elib-banner py-4">
+<div class="container">
+<div class="row align-items-center">
+<div class="col-md-8 d-flex align-items-center gap-3">
+<img src="{% static 'images/lo.png' %}" alt="logo" height="45">
+<div>
+<h5 class="mb-1 fw-bold">E-LIBRARY</h5>
+<p class="mb-0 small">Electronic library where you can have access to books, journals and articles</p>
+</div>
+</div>
+<div class="col-md-4 text-md-end mt-3 mt-md-0">
+<a href="#" class="btn rounded-pill px-4">Visit the E-Library</a>
+</div>
+</div>
+</div>
+</section>
+<!-- FOOTER -->
+<footer class="footer pt-5">
+<div class="container">
+
+
+<div class="row gy-4">
+<!-- OUR CAMPUSES -->
+<div class="col-md-4">
+<h6>OUR CAMPUSES</h6>
+<div class="row">
+<div class="col-6">
+<ul class="list-unstyled small">
+<li><a href="#">CALABAR CAMPUS</a></li>
+<li><a href="#">OGOJA CAMPUS</a></li>
+</ul>
+</div>
+<div class="col-6">
+<ul class="list-unstyled small">
+<li><a href="#">OBUBRA CAMPUS</a></li>
+<li><a href="#">OKUKU CAMPUS</a></li>
+</ul>
+</div>
+</div>
+</div>
+   <!-- FACULTIES -->
+<div class="col-md-5">
+<h6>FACULTIES</h6>
+<div class="row small">
+<div class="col-6">
+<ul class="list-unstyled">
+<li><a href="#">Agriculture and Forestry</a></li>
+<li><a href="#">Basic Medical Sciences</a></li>
+<li><a href="#">Communication Technology</a></li>
+<li><a href="#">Engineering</a></li>
+<li><a href="#">Management Science</a></li>
+<li><a href="#">Computing</a></li>
+</ul>
+</div>
+<div class="col-6">
+<ul class="list-unstyled">
+<li><a href="#">Architecture</a></li>
+<li><a href="#">Biological Sciences</a></li>
+<li><a href="#">Education</a></li>
+<li><a href="#">Environmental Sciences</a></li>
+<li><a href="#">Physical Sciences</a></li>
+</ul>
+</div>
+</div>
+</div>
+<!-- HELP & SUPPORT -->
+<div class="col-md-3">
+<h6>HELP & SUPPORT</h6>
+<ul class="list-unstyled small">
+<li><a href="#">24x7 Live help</a></li>
+<li><a href="#">Feedback</a></li>
+<li><a href="#">Safety Tips</a></li>
+<li><a href="#">Contact us</a></li>
+<li><a href="#">FAQs</a></li>
+</ul>
+</div>
+</div>
+<hr class="my-4 border-secondary" />
+
+<!-- LOWER FOOTER -->
+<div class="row gy-4 align-items-center pb-4">
+<!-- GET IN TOUCH -->
+<div class="col-md-4 small">
+<h6>GET IN TOUCH</h6>
+<p class="mb-1"><i class="bi bi-geo-alt"></i> CRUTECH P.M.B 1123, Calabar, Cross River State, Nigeria.</p>
+<p class="mb-1"><i class="bi bi-telephone"></i> (+234) 805-212-9091</p>
+<p class="mb-0"><i class="bi bi-envelope"></i> info@unicross.edu.ng</p>
+</div>
+<!-- APPS -->
+<div class="col-md-4 text-center">
+<h6>DOWNLOAD OUR FREE MOBILE APPS</h6>
+<div class="d-flex justify-content-center gap-2 mt-2">
+<img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" height="40" alt="App Store">
+<img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" height="40" alt="Google Play">
+</div>
+</div>
+<!-- SOCIAL MEDIA -->
+<div class="col-md-4 text-md-end text-center">
+<h6>SOCIAL MEDIA</h6>
+<div class="d-flex justify-content-md-end justify-content-center gap-3 mt-2">
+<a href="#"><i class="bi bi-facebook fs-5"></i></a>
+<a href="#"><i class="bi bi-twitter-x fs-5"></i></a>
+<a href="#"><i class="bi bi-google fs-5"></i></a>
+<a href="#"><i class="bi bi-youtube fs-5"></i></a>
+<a href="#"><i class="bi bi-whatsapp fs-5"></i></a>
+</div>
+</div>
+</div>
+</div>
+<!-- COPYRIGHT -->
+<div class="footer-bottom text-center py-3">
+Copyright © 2026 All Rights Reserved. Developed By Thomas Emmanuel
+</div>
+</footer>
+
+
+<!-- Bootstrap JS -->
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <script src="{% static 'js/script.js' %}"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const status = document.getElementById("gps_status");
+
+        function setLocation(lat, lng, source="GPS") {
+            document.getElementById("gps_latitude").value = lat;
+            document.getElementById("gps_longitude").value = lng;
+            status.innerText = `Location captured via ${source} ✔`;
+        }
+
+    function getGPSLocation() {
+        if (!navigator.geolocation) {
+            status.innerText = "GPS not supported, using fallback...";
+            getIPLocation();
+            return;
+        }
+
+        status.innerText = "Getting precise GPS location...";
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                setLocation(
+                    position.coords.latitude,
+                    position.coords.longitude,
+                    "GPS"
+                );
+            },
+            function(error) {
+                console.log(error.message);
+                status.innerText = "GPS failed, switching to network...";
+                getIPLocation();
+            },
+            {
+                enableHighAccuracy: true,  // 🔥 IMPORTANT
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    function getIPLocation() {
+
+    fetch("https://ipwho.is/")
+        .then(res => res.json())
+        .then(data => {
+
+            if(data.success){
+
+                setLocation(
+                    data.latitude,
+                    data.longitude,
+                    "Network"
+                );
+
+            } else {
+
+                status.innerText =
+                    "Unable to detect location";
+            }
+        })
+        .catch(error => {
+
+            console.log(error);
+
+            status.innerText =
+                "Unable to detect location";
+        });
+
+}
+
+    // 🔥 START HERE
+    getGPSLocation();
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ================= MAP INIT =================
+    const map = L.map("map").setView([4.8156, 7.0498], 13);
+
+    L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+        {
+            attribution: "Tiles © Esri"
+        }
+    ).addTo(map);
+
+    // ================= FIX LEAFLET DEFAULT ICON ISSUE =================
+    delete L.Icon.Default.prototype._getIconUrl;
+
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png"
+    });
+
+    // ================= ICON SYSTEM =================
+    function getIcon(type) {
+
+        let iconUrl = "/static/images/icons/default.png";
+
+        if (type === "fire") {
+            iconUrl = "/static/images/icons/fire-icon.png";
+        }
+        else if (type === "crime") {
+            iconUrl = "/static/images/icons/crime.png";
+        }
+        else if (type === "health") {
+            iconUrl = "/static/images/icons/ambulance.png";
+        }
+        else if (type === "accident") {
+            iconUrl = "/static/images/icons/accident.png";
+        }
+
+        return L.icon({
+            iconUrl: iconUrl,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -35]
+        });
+    }
+
+    // ================= STORE STATE =================
+    let markers = [];
+    let loadedIds = new Set();
+
+    // ================= LOAD INCIDENTS =================
+    function loadIncidents() {
+
+        fetch("/incident/incident-data/")
+        .then(res => res.json())
+        .then(data => {
+
+            console.log("📦 INCIDENTS LOADED:", data);
+
+            data.forEach(incident => {
+
+                // prevent duplicates
+                if (loadedIds.has(incident.id)) return;
+                loadedIds.add(incident.id);
+
+                // safety check
+                if (incident.lat == null || incident.lng == null) return;
+
+                // add marker
+                const marker = L.marker(
+                    [incident.lat, incident.lng],
+                    { icon: getIcon(incident.type) }
+                )
+                .addTo(map)
+                .bindPopup(`
+                    <div style="text-align:left;">
+                        <h4 style="margin:0; color:#d9534f;">
+                            ${incident.type.toUpperCase()}
+                        </h4>
+                        <p style="margin:5px 0;">
+                            ${incident.description}
+                        </p>
+                        <small>
+                            <b>Location:</b> ${incident.location}
+                        </small><br>
+                        <small>
+                            <b>Status:</b> ${incident.status}
+                        </small>
+                    </div>
+                `);
+
+                markers.push(marker);
+
+            });
+
+            // ================= AUTO ZOOM =================
+            if (markers.length > 0) {
+                const group = new L.featureGroup(markers);
+                map.fitBounds(group.getBounds(), {
+                    padding: [60, 60]
+                });
+            }
+
+        })
+        .catch(err => {
+            console.error("❌ ERROR LOADING INCIDENTS:", err);
+        });
+    }
+
+    // ================= INITIAL LOAD =================
+    loadIncidents();
+
+    // ================= OPTIONAL LIVE REFRESH =================
+    setInterval(loadIncidents, 10000);
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const socket = new WebSocket(
+        "ws://" + window.location.host + "/ws/incidents/"
+    );
+
+    socket.onopen = function () {
+        console.log("✅ Frontend websocket connected");
+    };
+
+    socket.onmessage = function(event){
+
+        const response = JSON.parse(event.data);
+
+        console.log("🔥 Frontend received:", response);
+
+      
+        // STATUS UPDATE FROM STAFF
+if(response.message_type === "status_update"){
+
+    const container =
+        document.getElementById("status-container");
+
+    const teams = {
+        fire: "Fire response team",
+        crime: "Security team",
+        health: "Medical team",
+        accident: "Accident response team"
+    };
+
+    const messages = {
+
+        acknowledged:
+            `${teams[response.incident_type]} has acknowledged your emergency report.`,
+
+        dispatched:
+            `${teams[response.incident_type]} has been dispatched to your location.`,
+
+        on_scene:
+            `${teams[response.incident_type]} has arrived at your location.`,
+
+        resolved:
+            `Your emergency has been resolved. Stay safe.`
+    };
+
+    const updateMessage =
+        messages[response.status] ||
+        "Emergency status updated.";
+
+    container.innerHTML = `
+        <div style="
+            background:#d1ecf1;
+            color:#000;
+            margin:5px 10px;
+            padding: 4px 12px;
+            border-radius:6px;
+            font-size: 13px;
+            font-weight:500;
+            text-align:center;
+            line-height:1.4;
+        ">
+            🚨 <strong>Emergency Status Update</strong> — ${updateMessage}
+        </div>
+    `;
+
+    setTimeout(() => {
+        container.innerHTML = "";
+    }, 8000);
+}
+
+};
+
+});
+</script>
+</body>
+</html>

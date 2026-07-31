@@ -1,0 +1,121 @@
+/* HERO SECTION */
+.hero-section {
+    height: 85vh;
+    position: relative;
+}
+
+.hero-section .overlay {
+    position: absolute;
+   
+}
+
+/* Emergency Card Image Styling */
+.emergency-card img {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Card Hover Effect */
+.emergency-card {
+    transition: 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.emergency-card:hover {
+    transform: translateY(-8px);
+}
+
+/* Title spacing */
+.card-title {
+    font-weight: bold;
+}
+/* REPORT SECTION */
+.report-section {
+    background: #f8f9fa;
+}
+
+/* FORM STYLING */
+form input,
+form select,
+form textarea {
+    border-radius: 8px;
+}
+
+button {
+    border-radius: 8px !important;
+}
+
+
+.c-item{
+    height: 600px;
+}
+.c-img{
+    height:100%;
+    object-fit: cover;
+}
+
+.c-item-1{
+    height:600px;
+}
+.c-img-1{
+    height: 100%;
+    object-fit: cover;
+}
+.cl-2{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 150px;
+}
+
+.elib-banner {
+background: #1e90ff;
+color: #fff;
+}
+
+
+.elib-banner .btn {
+border: 2px solid #fff;
+color: #fff;
+}
+
+
+.elib-banner .btn:hover {
+background: #fff;
+color: #1e90ff;
+}
+
+
+.footer {
+background: #061f3a;
+color: #cfd8e3;
+}
+.footer h6 {
+color: #fff;
+font-weight: 600;
+}
+
+
+.footer a {
+color: #cfd8e3;
+text-decoration: none;
+}
+
+
+.footer a:hover {
+color: #1e90ff;
+}
+
+
+.footer-bottom {
+border-top: 1px solid rgba(255,255,255,.1);
+font-size: 0.85rem;
+}
+
+@keyframes blink {
+    0% { background-color: #dc3545; }
+    50% { background-color: #ff0000; }
+    100% { background-color: #dc3545; }
+}
