@@ -259,15 +259,19 @@ class IncidentAdmin(admin.ModelAdmin):
 
             # ✅ ONLY RUN WHEN STATUS CHANGES
             if old_obj.status != obj.status:
+                super().save_model(request, obj, form, change)
 
                 # 🔥 AUTO ASSIGN STAFF WHO MADE THE CHANGE
                 #if not request.user.is_superuser:
-                obj.acknowledged_by = request.user
+                Incident.objects.filter(pk=obj.pk).update(
+                acknowledged_by=request.user )
 
-                channel_layer = get_channel_layer()
+                obj.refresh_from_db()
 
                 # SMS
                 send_status_sms(obj, obj.status)
+
+                channel_layer = get_channel_layer()
 
                 # WebSocket update
                 async_to_sync(channel_layer.group_send)(
@@ -278,11 +282,12 @@ class IncidentAdmin(admin.ModelAdmin):
                             "id": obj.id,
                             "status": obj.status,
                             "incident_type": obj.incident_type,
-                            "acknowledged_by": request.user.email
+                            #"acknowledged_by": request.user.email
                             #"acknowledged_by": request.user.username if request.user else None
                         }
                     }
                 )
+                return
 
         super().save_model(request, obj, form, change)
 
