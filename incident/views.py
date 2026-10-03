@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import JsonResponse
 from .models import Incident
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer  # type: ignore
@@ -168,29 +167,4 @@ DESCRIPTION:
     return render(request, "frontend/index.html")
 
 
-# =========================================
-# LIVE INCIDENT MAP API
-# =========================================
 
-def incident_data(request):
-
-    incidents = Incident.objects.all().order_by("-created_at")
-
-    data = []
-
-    for i in incidents:
-
-        if i.latitude is None or i.longitude is None:
-            continue
-
-        data.append({
-            "id": i.id,
-            "type": i.incident_type,
-            "description": i.description,
-            "location": i.location_text,
-            "lat": i.latitude,
-            "lng": i.longitude,
-            "status": i.status,
-        })
-
-    return JsonResponse(data, safe=False)

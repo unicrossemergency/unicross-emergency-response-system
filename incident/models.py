@@ -20,6 +20,30 @@ class Incident(models.Model):
         ('resolved', 'Resolved'),
     )
 
+    LOCATION_CHOICES = (
+        ('Main Gate', 'Main Gate'),
+        ('New Science Block', 'New Science Block'),
+        ('Mass Communication', 'Mass Communication'),
+        ('Entrepreneurship Centre', 'Entrepreneurship Centre'),
+        ('ICT/Computer Building', 'ICT/Computer Building'),
+        ('Faculty of Sciences', 'Faculty of Sciences'),
+        ('Faculty of Computing', 'Faculty of Computing'),
+        ('Faculty of Engineering', 'Faculty of Engineering'),
+        ('Administrative Block', 'Administrative Block'),
+        ('Senate Building', 'Senate Building'),
+        ('MIS Building', 'MIS Building'),
+        ('Student Affairs Unit', 'Student Affairs Unit'),
+        ('SUG Secretariat', 'SUG Secretariat'),
+        ('Lecture Theatre', 'Lecture Theatre'),
+        ('Medical Unit', 'Medical Unit'),
+        ('E-Library', 'E-Library'),
+        ('Student Hostel', 'Student Hostel'),
+        ('Bursary', 'Bursary'),
+        ('Sports Complex', 'Sports Complex'),
+        ('Staff Quarters', 'Staff Quarters'),
+        ('Other', 'Other'),
+    )
+
     # Reporter
     name = models.CharField(max_length=150, null=True, blank=True)
     phone = models.CharField(max_length=20, null=True, blank=True)
@@ -30,7 +54,7 @@ class Incident(models.Model):
     description = models.TextField()
 
     # Location
-    location_text = models.CharField(max_length=255)
+    location_text = models.CharField(max_length=255,choices=LOCATION_CHOICES)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
 

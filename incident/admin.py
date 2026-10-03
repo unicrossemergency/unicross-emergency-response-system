@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Incident,SMSLog
-from django.utils import timezone
+from .models import Incident, SMSLog
 from django.utils.html import format_html
 from .services import send_status_sms
 from asgiref.sync import async_to_sync
@@ -19,95 +18,165 @@ class IncidentAdmin(admin.ModelAdmin):
         "created_at",
     )
 
-    list_filter = ("incident_type", "status","is_anonymous")
+    list_filter = (
+        "incident_type",
+        "status",
+        "is_anonymous",
+    )
 
-    search_fields = ("location_text", "description","name","phone")
+    search_fields = (
+        "location_text",
+        "description",
+        "name",
+        "phone",
+    )
 
     ordering = ("-created_at",)
 
-    # 🔥 THIS IS THE MAP FUNCTION
-    def location_map(self, obj):
+    # =========================================
+    # GPS COORDINATES
+    # =========================================
+
+    def gps_coordinates(self, obj):
+
         if obj.latitude is not None and obj.longitude is not None:
+
+            google_maps_url = (
+                f"https://www.google.com/maps/search/"
+                f"?api=1&query={obj.latitude},{obj.longitude}"
+            )
+
             return format_html(
                 '''
-                <a href="https://www.google.com/maps?q={},{}" target="_blank">
-                Open Full Map
-                </a>
-                <br><br>
-                <iframe
-                    width="100%"
-                    height="350"
-                    style="border:0; border-radius:12px;"
-                    loading="lazy"
-                    src="https://maps.google.com/maps?q={},{}&z=16&output=embed">
-                </iframe>
+                <div>
+                    <strong>Latitude:</strong> {}<br>
+                    <strong>Longitude:</strong> {}<br><br>
+
+                    <a href="{}"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        📍 Open Coordinates in Google Maps
+                    </a>
+                </div>
                 ''',
-                obj.latitude, obj.longitude, # for link
-                obj.latitude, obj.longitude  # for iframe
+                obj.latitude,
+                obj.longitude,
+                google_maps_url,
             )
-        return "No GPS location available"
 
-    location_map.short_description = "Live Map"
+        return format_html(
+            '<span style="color:#777;">GPS coordinates not available</span>'
+        )
 
-    readonly_fields = ("location_map", "created_at", "updated_at")
+    gps_coordinates.short_description = "GPS Coordinates"
+
+    readonly_fields = (
+        "gps_coordinates",
+        "created_at",
+        "updated_at",
+    )
 
     fieldsets = (
 
-        ("🚨 Incident Details", {
-            "fields": ("incident_type", "description", "status")
-        }),
+        (
+            "🚨 Incident Details",
+            {
+                "fields": (
+                    "incident_type",
+                    "description",
+                    "status",
+                )
+            },
+        ),
 
-        ("👤 Reporter Info", {
-            "fields": ("name", "phone", "is_anonymous")
-        }),
+        (
+            "👤 Reporter Information",
+            {
+                "fields": (
+                    "name",
+                    "phone",
+                    "is_anonymous",
+                )
+            },
+        ),
 
-        ("📍 Location", {
-            "fields": ("location_text", "latitude", "longitude", "location_map")
-        }),
+        (
+            "📍 Emergency Location",
+            {
+                "fields": (
+                    "location_text",
+                    "gps_coordinates",
+                )
+            },
+        ),
 
-        ("🚑 Response", {
-            "fields": ("acknowledged_by", "scene_image")
-        }),
+        (
+            "🚑 Response",
+            {
+                "fields": (
+                    "assigned_to",
+                    "acknowledged_by",
+                    "scene_image",
+                )
+            },
+        ),
 
-        ("⏱️ System Info", {
-            "fields": ("created_at", "updated_at")
-        }),
+        (
+            "⏱️ System Information",
+            {
+                "fields": (
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
     )
 
+    # =========================================
+    # ROLE FILTER
+    # =========================================
 
-    # 🔥 ROLE FILTER (IMPORTANT SECURITY LAYER)
     def get_queryset(self, request):
+
         qs = super().get_queryset(request)
 
         if request.user.is_superuser:
             return qs
 
         if hasattr(request.user, "role") and request.user.role:
-            return qs.filter(incident_type=request.user.role).order_by("-created_at")
+            return qs.filter(
+                incident_type=request.user.role
+            ).order_by("-created_at")
 
         return qs.none()
-    
+
+    # =========================================
+    # STAFF VIEW
+    # =========================================
+
     def get_fields(self, request, obj=None):
 
         if request.user.is_superuser:
             return "__all__"
 
-        # STAFF VIEW ONLY
         return (
             "incident_type",
             "description",
             "location_text",
-            "latitude",
-            "longitude",
+            "gps_coordinates",
             "name",
             "phone",
             "is_anonymous",
             "status",
+            "assigned_to",
             "scene_image",
             "acknowledged_by",
-            "location_map",
             "created_at",
         )
+
+    # =========================================
+    # READONLY FIELDS
+    # =========================================
 
     def get_readonly_fields(self, request, obj=None):
 
@@ -118,35 +187,34 @@ class IncidentAdmin(admin.ModelAdmin):
             "incident_type",
             "description",
             "location_text",
-            "latitude",
-            "longitude",
+            "gps_coordinates",
             "name",
             "phone",
             "is_anonymous",
             "created_at",
             "updated_at",
-            "location_map",
-            "acknowledged_by"
+            "acknowledged_by",
         )
-        
-  # 🔥 ACTIONS (DISPATCH ENGINE)
+
+    # =========================================
+    # ACTIONS - ACKNOWLEDGE
+    # =========================================
 
     def acknowledge(self, request, queryset):
 
         channel_layer = get_channel_layer()
 
         for incident in queryset:
+
             incident.status = "acknowledged"
             incident.acknowledged_by = request.user
             incident.save()
 
-            # send SMS
             send_status_sms(
                 incident,
                 "acknowledged"
             )
 
-            # realtime frontend update
             async_to_sync(channel_layer.group_send)(
                 "incidents",
                 {
@@ -159,9 +227,14 @@ class IncidentAdmin(admin.ModelAdmin):
                 }
             )
 
+    # =========================================
+    # ACTIONS - DISPATCH
+    # =========================================
+
     def dispatch(self, request, queryset):
 
         channel_layer = get_channel_layer()
+
         print("📡 ABOUT TO SEND WS MESSAGE")
 
         for incident in queryset:
@@ -189,17 +262,21 @@ class IncidentAdmin(admin.ModelAdmin):
                         "id": incident.id,
                         "status": incident.status,
                         "incident_type": incident.incident_type,
-                        "message_type": "status_update"
+                        "message_type": "status_update",
                     }
                 }
             )
 
+    # =========================================
+    # ACTIONS - ON SCENE
+    # =========================================
 
     def mark_on_scene(self, request, queryset):
 
         channel_layer = get_channel_layer()
 
         for incident in queryset:
+
             incident.status = "on_scene"
             incident.acknowledged_by = request.user
             incident.save()
@@ -221,12 +298,16 @@ class IncidentAdmin(admin.ModelAdmin):
                 }
             )
 
+    # =========================================
+    # ACTIONS - RESOLVE
+    # =========================================
 
     def resolve(self, request, queryset):
 
         channel_layer = get_channel_layer()
 
         for incident in queryset:
+
             incident.status = "resolved"
             incident.acknowledged_by = request.user
             incident.save()
@@ -248,8 +329,16 @@ class IncidentAdmin(admin.ModelAdmin):
                 }
             )
 
+    actions = [
+        "acknowledge",
+        "dispatch",
+        "mark_on_scene",
+        "resolve",
+    ]
 
-    actions = ["acknowledge", "dispatch", "mark_on_scene", "resolve"]
+    # =========================================
+    # SAVE MODEL
+    # =========================================
 
     def save_model(self, request, obj, form, change):
 
@@ -257,24 +346,33 @@ class IncidentAdmin(admin.ModelAdmin):
 
             old_obj = Incident.objects.get(pk=obj.pk)
 
-            # ✅ ONLY RUN WHEN STATUS CHANGES
             if old_obj.status != obj.status:
-                super().save_model(request, obj, form, change)
 
-                # 🔥 AUTO ASSIGN STAFF WHO MADE THE CHANGE
-                #if not request.user.is_superuser:
-                Incident.objects.filter(pk=obj.pk).update(
-                acknowledged_by=request.user )
+                super().save_model(
+                    request,
+                    obj,
+                    form,
+                    change
+                )
+
+                Incident.objects.filter(
+                    pk=obj.pk
+                ).update(
+                    acknowledged_by=request.user
+                )
 
                 obj.refresh_from_db()
 
-                # SMS
-                send_status_sms(obj, obj.status)
+                send_status_sms(
+                    obj,
+                    obj.status
+                )
 
                 channel_layer = get_channel_layer()
 
-                # WebSocket update
-                async_to_sync(channel_layer.group_send)(
+                async_to_sync(
+                    channel_layer.group_send
+                )(
                     "incidents",
                     {
                         "type": "status_update",
@@ -282,16 +380,25 @@ class IncidentAdmin(admin.ModelAdmin):
                             "id": obj.id,
                             "status": obj.status,
                             "incident_type": obj.incident_type,
-                            #"acknowledged_by": request.user.email
-                            #"acknowledged_by": request.user.username if request.user else None
                         }
                     }
                 )
+
                 return
 
-        super().save_model(request, obj, form, change)
+        super().save_model(
+            request,
+            obj,
+            form,
+            change
+        )
+
+    # =========================================
+    # STATUS DISPLAY
+    # =========================================
 
     def status_tag(self, obj):
+
         colors = {
             "submitted": "orange",
             "acknowledged": "blue",
@@ -300,28 +407,42 @@ class IncidentAdmin(admin.ModelAdmin):
             "resolved": "green",
         }
 
-        color = colors.get(obj.status, "black")
+        color = colors.get(
+            obj.status,
+            "black"
+        )
 
         return format_html(
-            '<span style="color:white; background:{}; padding:4px 8px; border-radius:6px;">{}</span>',
+            '<span style="color:white; '
+            'background:{}; '
+            'padding:4px 8px; '
+            'border-radius:6px;">{}</span>',
             color,
-            obj.status.upper()
+            obj.status.upper(),
         )
 
     status_tag.short_description = "Status"
 
+    # =========================================
+    # INCIDENT PRIORITY
+    # =========================================
+
     def incident_priority(self, obj):
+
         if obj.incident_type == "fire":
             return "🔥 HIGH"
+
         elif obj.incident_type == "crime":
             return "🚨 MEDIUM"
+
         elif obj.incident_type == "health":
             return "HIGH"
+
         else:
             return "⚪ NORMAL"
 
     incident_priority.short_description = "Priority"
-    
+
     class Media:
         js = ("js/admin_incident_ws.js",)
 
@@ -344,7 +465,7 @@ class SMSLogAdmin(admin.ModelAdmin):
     search_fields = (
         "phone",
         "department",
-        "message"
+        "message",
     )
 
     list_filter = (
@@ -355,6 +476,7 @@ class SMSLogAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
 
     def get_queryset(self, request):
+
         qs = super().get_queryset(request)
 
         if request.user.is_superuser:
@@ -367,21 +489,28 @@ class SMSLogAdmin(admin.ModelAdmin):
             ).order_by("-created_at")
 
         return qs.none()
-    
+
     def has_view_permission(self, request, obj=None):
+
         return request.user.is_superuser or (
-            request.user.is_staff and hasattr(request.user, "role")
+            request.user.is_staff
+            and hasattr(request.user, "role")
         )
 
     def has_change_permission(self, request, obj=None):
+
         return request.user.is_superuser or (
-            request.user.is_staff and hasattr(request.user, "role")
+            request.user.is_staff
+            and hasattr(request.user, "role")
         )
 
     def has_add_permission(self, request):
+
         return request.user.is_superuser or (
-            request.user.is_staff and hasattr(request.user, "role")
+            request.user.is_staff
+            and hasattr(request.user, "role")
         )
 
     def has_delete_permission(self, request, obj=None):
+
         return request.user.is_superuser
